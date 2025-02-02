@@ -26,6 +26,7 @@ public class Spawner : MonoBehaviour
         }
 
         Board.InitializeGrid(blockPrefab);
+        ActivateNextPiece();
     }
 
     // Update is called once per frame

@@ -10,9 +10,8 @@ public class Board : MonoBehaviour
     public static GameObject[,] grid = new GameObject[w, h];
     private static Spawner spawner;
 
-    void Start()
+    public static void InitializeGrid(GameObject blockPrefab)
     {
-        Debug.Log("Inicializando el tablero...");
         spawner = FindFirstObjectByType<Spawner>();
         if (spawner == null)
         {
@@ -22,10 +21,7 @@ public class Board : MonoBehaviour
         {
             Debug.Log("Spawner inicializado correctamente.");
         }
-    }
 
-    public static void InitializeGrid(GameObject blockPrefab)
-    {
         Debug.Log("Inicializando la grilla...");
         for (int x = 0; x < w; x++)
         {
@@ -37,21 +33,13 @@ public class Board : MonoBehaviour
                 grid[x, y] = block;
             }
         }
-
-        spawner.ActivateNextPiece();
     }
 
     public static void ActivateBlock(int x, int y)
     {
         if (grid[x, y] != null)
-        {
-            grid[x, y].SetActive(true); // Activar el bloque
+            grid[x, y].SetActive(true);
             Debug.Log($"Bloque activado en posición ({x}, {y})");
-        }
-        else
-        {
-            Debug.LogWarning($"No se encontró un bloque en ({x}, {y})");
-        }
     }
 
     // Rounds Vector2 so does not have decimal values
@@ -97,7 +85,7 @@ public class Board : MonoBehaviour
                 grid[x, y] = null;
 
                 // Update the object's position
-                if (grid[x, y - 1] != null)
+                if(grid[x, y - 1] != null)
                 {
                     grid[x, y - 1].transform.position += new Vector3(0, -1, 0);
                 }
@@ -115,7 +103,7 @@ public class Board : MonoBehaviour
     }
 
     // TODO: Return true if all cells in a row have a GameObject (are not null), false otherwise
-    private static bool IsRowFull(int y)
+     private static bool IsRowFull(int y)
     {
         for (int x = 0; x < w; ++x)
         {
