@@ -112,19 +112,33 @@ public class Piece : MonoBehaviour
     }
 
     // Returns if the current position of the piece makes the board valid or not.
-    bool IsValidBoard()
+    public bool IsValidBoard()
     {
         foreach (Transform child in transform)
         {
             Vector2 v = Board.RoundVector2(child.position);
+            Debug.Log($"Verificando posición {v}");
+
             // Not inside Border?
             if (!Board.InsideBorder(v))
+            {
+                Debug.Log("Posición fuera de los límites.");
                 return false;
-            //Bloque en la celda de la cuadrícula (y no forma parte del mismo grupo)?
-            if (Board.grid[(int)v.x, (int)v.y] != null &&
-            Board.grid[(int)v.x, (int)v.y].transform.parent != transform &&
-            Board.grid[(int)v.x, (int)v.y].activeInHierarchy){
-                return false;
+            }
+
+            // Block in grid cell (and not part of same group)?
+            if (Board.grid[(int)v.x, (int)v.y] != null)
+            {
+                Debug.Log($"Bloque encontrado en posición {v}");
+                if (Board.grid[(int)v.x, (int)v.y].transform.parent != transform)
+                {
+                    Debug.Log($"Bloque en posición {v} no es parte de la misma pieza.");
+                    if (Board.grid[(int)v.x, (int)v.y].activeInHierarchy)
+                    {
+                        Debug.Log("Colisión detectada.");
+                        return false;
+                    }
+                }
             }
         }
         return true;

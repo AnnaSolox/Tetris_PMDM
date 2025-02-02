@@ -10,8 +10,9 @@ public class Board : MonoBehaviour
     public static GameObject[,] grid = new GameObject[w, h];
     private static Spawner spawner;
 
-    public static void InitializeGrid(GameObject blockPrefab)
+    void Start()
     {
+        Debug.Log("Inicializando el tablero...");
         spawner = FindFirstObjectByType<Spawner>();
         if (spawner == null)
         {
@@ -21,7 +22,10 @@ public class Board : MonoBehaviour
         {
             Debug.Log("Spawner inicializado correctamente.");
         }
+    }
 
+    public static void InitializeGrid(GameObject blockPrefab)
+    {
         Debug.Log("Inicializando la grilla...");
         for (int x = 0; x < w; x++)
         {

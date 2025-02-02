@@ -62,5 +62,16 @@ public class Spawner : MonoBehaviour
         piece.transform.position = new Vector3(5, 19, 0); // Ajusta la posición inicial si es necesario
         piece.SetActive(true);
         piece.GetComponent<Piece>().enabled = true;
+
+        if (!piece.GetComponent<Piece>().IsValidBoard())
+        {
+            Debug.Log("GAME OVER");
+            // Aquí puedes añadir lógica adicional para manejar el fin del juego, como detener el juego o mostrar una pantalla de fin de juego
+            piece.SetActive(false);
+        }
+        else
+        {
+            Debug.Log("Pieza activada correctamente.");
+        }
     }
 }
