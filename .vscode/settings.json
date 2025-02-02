@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Tetris_PMDM_2a.sln"
+    "dotnet.defaultSolution": "Tetris_PMDM.sln"
 }
