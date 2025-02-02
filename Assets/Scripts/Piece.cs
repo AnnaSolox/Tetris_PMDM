@@ -12,8 +12,8 @@ public class Piece : MonoBehaviour
         // Default position not valid? Then it's game over
         if (!IsValidBoard())
         {
-            /* Debug.Log("GAME OVER");
-            Destroy(gameObject); */
+            Debug.Log("GAME OVER");
+            Destroy(gameObject);
         }
     }
 
@@ -21,9 +21,6 @@ public class Piece : MonoBehaviour
     // Implements all piece movements: right, left, rotate and down.
     void Update()
     {
-        if (!enabled)
-            return;
-
         // Move Left
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
@@ -31,23 +28,23 @@ public class Piece : MonoBehaviour
         }
 
         // Move Right
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        else if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             MovePiece(new Vector3(1, 0, 0));
         }
 
         // Rotate (Key UpArrow)
-        if (Input.GetKeyDown(KeyCode.UpArrow))
+        else if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            transform.rotation *= Quaternion.Euler(0, 0, 90);
+            transform.Rotate(0, 0, 90);
             if (IsValidBoard())
                 UpdateBoard();
             else
-                transform.rotation *= Quaternion.Euler(0, 0, -90);  // Revert the rotation
+                transform.Rotate(0, 0, -90);  // Revert the rotation
         }
 
         // Move Downwards and Fall (each second)
-        if (Input.GetKey(KeyCode.DownArrow) || Time.time - lastFall >= 1)
+        if (Input.GetKeyDown(KeyCode.DownArrow) || Time.time - lastFall >= 1)
         {
             MovePiece(new Vector3(0, -1, 0));
             lastFall = Time.time;
@@ -102,13 +99,6 @@ public class Piece : MonoBehaviour
                 }
             }
         }
-
-        // Then loop over the blocks of the current piece and add them to the Board.
-        foreach (Transform child in transform)
-        {
-            Vector2 v = Board.RoundVector2(child.position);
-            Board.grid[(int)v.x, (int)v.y] = child.gameObject;
-        }
     }
 
     // Returns if the current position of the piece makes the board valid or not.
@@ -127,18 +117,11 @@ public class Piece : MonoBehaviour
             }
 
             // Block in grid cell (and not part of same group)?
-            if (Board.grid[(int)v.x, (int)v.y] != null)
+            if (Board.grid[(int)v.x, (int)v.y] != null &&
+            Board.grid[(int)v.x, (int)v.y].transform.parent != transform &&
+            Board.grid[(int)v.x, (int)v.y].activeInHierarchy)
             {
-                Debug.Log($"Bloque encontrado en posición {v}");
-                if (Board.grid[(int)v.x, (int)v.y].transform.parent != transform)
-                {
-                    Debug.Log($"Bloque en posición {v} no es parte de la misma pieza.");
-                    if (Board.grid[(int)v.x, (int)v.y].activeInHierarchy)
-                    {
-                        Debug.Log("Colisión detectada.");
-                        return false;
-                    }
-                }
+                return false;
             }
         }
         return true;
