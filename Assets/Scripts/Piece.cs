@@ -28,21 +28,13 @@ public class Piece : MonoBehaviour
         // Move Left
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            transform.position += new Vector3(-1, 0, 0);
-            if (IsValidBoard())
-                UpdateBoard();
-            else
-                transform.position += new Vector3(1, 0, 0);
+            MovePiece(Vector3.left);
         }
 
         // Move Right
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            transform.position += new Vector3(1, 0, 0);
-            if (IsValidBoard())
-                UpdateBoard();
-            else
-                transform.position += new Vector3(-1, 0, 0);
+            MovePiece(Vector3.right);
         }
 
         // Rotate (Key UpArrow)
@@ -58,32 +50,37 @@ public class Piece : MonoBehaviour
         // Move Downwards and Fall (each second)
         if (Input.GetKey(KeyCode.DownArrow))
         {
-            transform.position += Vector3.down;
-            if (IsValidBoard())
-                UpdateBoard();
-            else
-                transform.position += Vector3.up;
+            MovePiece(Vector3.down);
         }
 
         // Automatic falling
         if (Time.time - lastFall >= 1)
         {
-            transform.position += Vector3.down;
-            if (IsValidBoard())
+            MovePiece(Vector3.down);
+            lastFall = Time.time;
+        }
+    }
+
+    void MovePiece(Vector3 direction)
+    {
+        transform.position += direction;
+
+        if (IsValidBoard())
+        {
+            UpdateBoard();
+        }
+        else
+        {
+            transform.position -= direction; // Revertir el movimiento si no es válido
+
+            // Si el movimiento inválido fue hacia abajo, la pieza se detiene
+            if (direction == Vector3.down)
             {
-                UpdateBoard();
-            }
-            else
-            {
-                transform.position += Vector3.up;
-                UpdateBoard();
                 isActive = false;
 
                 Board.DeleteFullRows();
                 FindFirstObjectByType<Spawner>().SpawnNext();
             }
-
-            lastFall = Time.time;
         }
     }
 
@@ -108,7 +105,7 @@ public class Piece : MonoBehaviour
             Vector2 v = Board.RoundVector2(child.position);
             Board.grid[(int)v.x, (int)v.y] = child.gameObject;
         }
-        
+
     }
 
     // Returns if the current position of the piece makes the board valid or not.
