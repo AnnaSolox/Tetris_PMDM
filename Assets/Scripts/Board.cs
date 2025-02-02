@@ -8,12 +8,53 @@ public class Board : MonoBehaviour
     public static int w = 10;
     public static int h = 20;
     public static GameObject[,] grid = new GameObject[w, h];
+    private static Spawner spawner;
+
+    public static void InitializeGrid(GameObject blockPrefab)
+    {
+        spawner = FindFirstObjectByType<Spawner>();
+        if (spawner == null)
+        {
+            Debug.LogError("Spawner no encontrado. Asegúrate de que el objeto Spawner esté presente en la escena.");
+        }
+        else
+        {
+            Debug.Log("Spawner inicializado correctamente.");
+        }
+
+        Debug.Log("Inicializando la grilla...");
+        for (int x = 0; x < w; x++)
+        {
+            for (int y = 0; y < h; y++)
+            {
+                grid[x, y] = null;
+                GameObject block = Instantiate(blockPrefab, new Vector3(x, y, 0), Quaternion.identity);
+                block.SetActive(false);
+                grid[x, y] = block;
+            }
+        }
+
+        spawner.ActivateNextPiece();
+    }
+
+    public static void ActivateBlock(int x, int y)
+    {
+        if (grid[x, y] != null)
+        {
+            grid[x, y].SetActive(true); // Activar el bloque
+            Debug.Log($"Bloque activado en posición ({x}, {y})");
+        }
+        else
+        {
+            Debug.LogWarning($"No se encontró un bloque en ({x}, {y})");
+        }
+    }
 
     // Rounds Vector2 so does not have decimal values
     // Used to force Integer coordinates (without decimals) when moving pieces
     public static Vector2 RoundVector2(Vector2 v)
     {
-        return new Vector2(Mathf.Round(v.x),Mathf.Round(v.y));
+        return new Vector2(Mathf.Round(v.x), Mathf.Round(v.y));
     }
 
     // TODO: Returns true if pos (x,y) is inside the grid, false otherwise
@@ -30,8 +71,9 @@ public class Board : MonoBehaviour
         {
             if (grid[x, y] != null)
             {
-                Destroy(grid[x, y]);
-                grid[x, y] = null;
+                /* Destroy(grid[x, y]);
+                grid[x, y] = null; */
+                grid[x, y].SetActive(false);
             }
         }
     }
@@ -51,7 +93,10 @@ public class Board : MonoBehaviour
                 grid[x, y] = null;
 
                 // Update the object's position
-                grid[x, y - 1].transform.position += new Vector3(0, -1, 0);
+                if (grid[x, y - 1] != null)
+                {
+                    grid[x, y - 1].transform.position += new Vector3(0, -1, 0);
+                }
             }
         }
     }
@@ -66,11 +111,11 @@ public class Board : MonoBehaviour
     }
 
     // TODO: Return true if all cells in a row have a GameObject (are not null), false otherwise
-    public static bool IsRowFull(int y)
+    private static bool IsRowFull(int y)
     {
         for (int x = 0; x < w; ++x)
         {
-            if (grid[x, y] == null)
+            if (grid[x, y] == null || !grid[x, y].activeSelf)
             {
                 return false;
             }

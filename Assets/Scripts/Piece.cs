@@ -12,8 +12,8 @@ public class Piece : MonoBehaviour
         // Default position not valid? Then it's game over
         if (!IsValidBoard())
         {
-            Debug.Log("GAME OVER");
-            Destroy(gameObject);
+            /* Debug.Log("GAME OVER");
+            Destroy(gameObject); */
         }
     }
 
@@ -27,13 +27,13 @@ public class Piece : MonoBehaviour
         // Move Left
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            MovePiece(new Vector3(-1,0,0));
+            MovePiece(new Vector3(-1, 0, 0));
         }
 
         // Move Right
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            MovePiece(new Vector3(1,0,0));
+            MovePiece(new Vector3(1, 0, 0));
         }
 
         // Rotate (Key UpArrow)
@@ -49,7 +49,7 @@ public class Piece : MonoBehaviour
         // Move Downwards and Fall (each second)
         if (Input.GetKey(KeyCode.DownArrow) || Time.time - lastFall >= 1)
         {
-            MovePiece(new Vector3(0,-1,0));
+            MovePiece(new Vector3(0, -1, 0));
             lastFall = Time.time;
         }
     }
@@ -57,7 +57,7 @@ public class Piece : MonoBehaviour
     void MovePiece(Vector3 direction)
     {
         transform.position += direction;
-
+        Debug.Log($"Moviendo pieza a {transform.position}");
         if (IsValidBoard())
         {
             UpdateBoard();
@@ -65,12 +65,23 @@ public class Piece : MonoBehaviour
         else
         {
             transform.position -= direction; // Revertir el movimiento si no es válido
+            Debug.Log("Movimiento inválido, revirtiendo...");
 
             // Si el movimiento inválido fue hacia abajo, la pieza se detiene
-            if (direction == new Vector3(0,-1,0))
+            if (direction == new Vector3(0, -1, 0))
             {
+                Debug.Log("Pieza se detiene, activando bloques...");
+                foreach (Transform child in transform)
+                {
+                    Vector2 v = Board.RoundVector2(child.position);
+                    Debug.Log($"Activando bloque en posición {v}");
+                    Board.ActivateBlock((int)v.x, (int)v.y);
+                }
+
+                FindFirstObjectByType<Spawner>().ActivateNextPiece();
+                transform.position = new Vector3(-100, -100, 0); // Mover a una ubicación no visible
+                gameObject.SetActive(false);
                 Board.DeleteFullRows();
-                FindFirstObjectByType<Spawner>().SpawnNext();
                 enabled = false;
             }
         }
@@ -79,6 +90,7 @@ public class Piece : MonoBehaviour
     // Updates the board with the current position of the piece.
     void UpdateBoard()
     {
+        Debug.Log("Actualizando el tablero con la posición actual de la pieza.");
         // First, loop over the Board and make current positions of the piece null.
         for (int y = 0; y < Board.h; y++)
         {
@@ -97,7 +109,6 @@ public class Piece : MonoBehaviour
             Vector2 v = Board.RoundVector2(child.position);
             Board.grid[(int)v.x, (int)v.y] = child.gameObject;
         }
-
     }
 
     // Returns if the current position of the piece makes the board valid or not.
@@ -106,15 +117,15 @@ public class Piece : MonoBehaviour
         foreach (Transform child in transform)
         {
             Vector2 v = Board.RoundVector2(child.position);
-
             // Not inside Border?
             if (!Board.InsideBorder(v))
                 return false;
-
-            // Block in grid cell (and not part of same group)?
+            //Bloque en la celda de la cuadrícula (y no forma parte del mismo grupo)?
             if (Board.grid[(int)v.x, (int)v.y] != null &&
-                Board.grid[(int)v.x, (int)v.y].transform.parent != transform)
+            Board.grid[(int)v.x, (int)v.y].transform.parent != transform &&
+            Board.grid[(int)v.x, (int)v.y].activeInHierarchy){
                 return false;
+            }
         }
         return true;
     }
