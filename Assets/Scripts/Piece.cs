@@ -5,7 +5,6 @@ using UnityEngine;
 public class Piece : MonoBehaviour
 {
     private float lastFall = 0f;
-    private bool isActive = true;
 
     // Start is called before the first frame update
     void Start()
@@ -22,19 +21,19 @@ public class Piece : MonoBehaviour
     // Implements all piece movements: right, left, rotate and down.
     void Update()
     {
-        if (!isActive)
+        if (!enabled)
             return;
 
         // Move Left
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            MovePiece(Vector3.left);
+            MovePiece(new Vector3(-1,0,0));
         }
 
         // Move Right
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            MovePiece(Vector3.right);
+            MovePiece(new Vector3(1,0,0));
         }
 
         // Rotate (Key UpArrow)
@@ -48,15 +47,9 @@ public class Piece : MonoBehaviour
         }
 
         // Move Downwards and Fall (each second)
-        if (Input.GetKey(KeyCode.DownArrow))
+        if (Input.GetKey(KeyCode.DownArrow) || Time.time - lastFall >= 1)
         {
-            MovePiece(Vector3.down);
-        }
-
-        // Automatic falling
-        if (Time.time - lastFall >= 1)
-        {
-            MovePiece(Vector3.down);
+            MovePiece(new Vector3(0,-1,0));
             lastFall = Time.time;
         }
     }
@@ -74,12 +67,11 @@ public class Piece : MonoBehaviour
             transform.position -= direction; // Revertir el movimiento si no es válido
 
             // Si el movimiento inválido fue hacia abajo, la pieza se detiene
-            if (direction == Vector3.down)
+            if (direction == new Vector3(0,-1,0))
             {
-                isActive = false;
-
                 Board.DeleteFullRows();
                 FindFirstObjectByType<Spawner>().SpawnNext();
+                enabled = false;
             }
         }
     }
